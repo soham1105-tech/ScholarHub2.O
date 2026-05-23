@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-forest-bg: #050d08;
+  --color-forest-card: rgba(15, 35, 24, 0.7);
+  --color-forest-card2: rgba(30, 61, 42, 0.4);
+  --color-forest-border: rgba(74, 222, 128, 0.1);
+  --color-forest-accent: #4ade80;
+  --color-forest-dim: #2d6a4f;
+  --color-forest-amber: #d4a853;
+  --color-forest-sage: #6b9e7a;
+  --color-forest-critical: #c4704f;
+  --color-forest-crit-bg: rgba(26, 16, 10, 0.8);
+  --color-forest-high-bg: rgba(22, 21, 8, 0.8);
+  --color-text-primary: #f0fdf4;
+  --color-text-muted: #94a3b8;
+  --color-text-faint: #475569;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", sans-serif;
+}
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-forest-bg text-text-primary overflow-x-hidden font-sans;
+  }
+}
+
+@layer components {
+  .ios-glass {
+    @apply backdrop-blur-3xl bg-forest-card border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+  }
+
+  .ios-card {
+    @apply rounded-[24px] backdrop-blur-3xl bg-forest-card border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300;
+  }
+
+  .ios-button {
+    @apply rounded-2xl transition-all duration-200 active:scale-95 flex items-center justify-center font-semibold;
+  }
+
+  .premium-gradient {
+    background: radial-gradient(circle at top left, rgba(74, 222, 128, 0.1), transparent 40%),
+                radial-gradient(circle at bottom right, rgba(212, 168, 83, 0.05), transparent 40%);
+  }
+}
+
+/* Custom scrollbar for calm feel */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(74, 222, 128, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(74, 222, 128, 0.2);
+}
+
+.page-transition {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

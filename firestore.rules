@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      
+      match /tasks/{taskId} {
+        function isValidTask(data, isCreate) {
+          return data.keys().hasAll(['title', 'course', 'priority', 'done', 'userId', 'createdAt', 'dueIn']) &&
+                 data.keys().size() == 7 &&
+                 data.title is string && data.title.size() <= 200 &&
+                 data.course is string && data.course.size() <= 200 &&
+                 data.dueIn is string && data.dueIn.size() <= 100 &&
+                 data.priority in ['critical', 'high', 'standard', 'default', 'low'] &&
+                 data.done is bool &&
+                 data.userId == request.auth.uid &&
+                 (isCreate ? data.createdAt == request.time : data.createdAt == resource.data.createdAt);
+        }
+
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTask(request.resource.data, true);
+        allow update: if isOwner(userId) && 
+                      isValidTask(request.resource.data, false) &&
+                      (
+                        // Action: Toggle Done
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['done'])
+                      );
+        allow delete: if isOwner(userId);
+      }
+
+      match /alerts/{alertId} {
+        function isValidAlert(data) {
+          return data.keys().hasAll(['type', 'title', 'desc', 'time', 'userId']) &&
+                 data.keys().size() == 5 &&
+                 data.type in ['critical', 'high', 'standard'] &&
+                 data.title is string && data.title.size() <= 200 &&
+                 data.desc is string && data.desc.size() <= 1000 &&
+                 data.userId == request.auth.uid;
+        }
+
+        allow list: if isOwner(userId);
+        allow get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidAlert(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /profile/{profileDoc} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+    }
+  }
+}

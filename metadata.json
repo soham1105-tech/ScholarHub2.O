@@ -1,0 +1,8 @@
+{
+  "name": "ScholarHub",
+  "description": "A calm, iOS-style academic dashboard for focus and productivity.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

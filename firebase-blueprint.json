@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "An academic task to be completed",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The name of the task" },
+        "course": { "type": "string", "description": "The course associated with the task" },
+        "dueIn": { "type": "string", "description": "Human readable due date" },
+        "priority": { "type": "string", "enum": ["critical", "high", "standard", "default"] },
+        "done": { "type": "boolean", "description": "Whether the task is completed" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" }
+      },
+      "required": ["title", "course", "priority", "done", "userId"]
+    },
+    "Alert": {
+      "title": "Alert",
+      "description": "A notification or alert for the user",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["critical", "high", "standard"] },
+        "title": { "type": "string" },
+        "desc": { "type": "string" },
+        "time": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" }
+      },
+      "required": ["type", "title", "desc", "time", "userId"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Meta information about the user",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "major": { "type": "string" },
+        "university": { "type": "string" },
+        "classOf": { "type": "string" },
+        "gpa": { "type": "number" }
+      }
+    }
+  },
+  "firestore": {
+    "users/{userId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "User's individual tasks"
+    },
+    "users/{userId}/alerts/{alertId}": {
+      "schema": "Alert",
+      "description": "User's notifications"
+    },
+    "users/{userId}/profile": {
+      "schema": "UserProfile",
+      "description": "User's profile data"
+    }
+  }
+}
