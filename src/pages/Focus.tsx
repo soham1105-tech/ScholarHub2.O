@@ -14,6 +14,35 @@ export default function Focus() {
   const [holdProgress, setHoldProgress] = useState(0);
   const [isHolding, setIsHolding] = useState(false);
 
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [warningType, setWarningType] = useState<'fullscreen' | 'tab'>('fullscreen');
+  const [focusViolations, setFocusViolations] = useState(0);
+
+  const enterFullscreen = () => {
+    try {
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) {
+        docEl.requestFullscreen().catch((err) => {
+          console.warn("Fullscreen request failed or was blocked by browser sandbox inside iframe:", err);
+        });
+      }
+    } catch (e) {
+      console.error("Fullscreen API error:", e);
+    }
+  };
+
+  const exitFullscreen = () => {
+    try {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch((err) => {
+          console.warn("Error exiting fullscreen:", err);
+        });
+      }
+    } catch (e) {
+      console.error("Error calling exitFullscreen:", e);
+    }
+  };
+
   // --- Real Personal Adaptive Audio Engine via Web Audio API ---
   const [isPlayingSound, setIsPlayingSound] = useState(false);
   const [soundVolume, setSoundVolume] = useState(40); // 0 to 100
@@ -365,6 +394,7 @@ export default function Focus() {
             setHasStarted(false);
             setIsRunning(false);
             setSecondsLeft(90 * 60);
+            exitFullscreen();
             return 0;
           }
           return prev + 4; // 120ms intervals -> takes 3 seconds
@@ -410,6 +440,7 @@ export default function Focus() {
             setIsFocusLocked(false);
             setSecondsLeft(0);
             localStorage.removeItem('focus_end_time');
+            exitFullscreen();
           } else {
             setSecondsLeft(timeLeft);
           }
@@ -432,7 +463,56 @@ export default function Focus() {
     };
   }, [isRunning, secondsLeft, setIsFocusLocked]);
 
+  // Fullscreen integrity tracking
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFull = !!document.fullscreenElement;
+      if (hasStarted && isRunning && !isFull && !showWarningModal) {
+        setWarningType('fullscreen');
+        setShowWarningModal(true);
+        setFocusViolations(prev => prev + 1);
+      }
+    };
 
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, [hasStarted, isRunning, showWarningModal]);
+
+  // Tab & focus tracking
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && hasStarted && isRunning && !showWarningModal) {
+        setWarningType('tab');
+        setShowWarningModal(true);
+        setFocusViolations(prev => prev + 1);
+      }
+    };
+
+    const handleWindowBlur = () => {
+      if (hasStarted && isRunning && !showWarningModal) {
+        setWarningType('tab');
+        setShowWarningModal(true);
+        setFocusViolations(prev => prev + 1);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleWindowBlur);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleWindowBlur);
+    };
+  }, [hasStarted, isRunning, showWarningModal]);
 
   const totalSeconds = 90 * 60;
   const progress = 1 - secondsLeft / totalSeconds;
@@ -502,10 +582,7 @@ export default function Focus() {
             </div>
           </div>
 
-          <div className="text-center w-full space-y-1">
-            <h2 className="text-[20px] font-bold text-white tracking-tight">Physics Lab Report</h2>
-            <p className="text-[14px] text-forest-accent font-semibold uppercase tracking-widest opacity-80">Phase 02: Analysis</p>
-          </div>
+
 
           <div className="flex gap-4 w-full mt-8">
             <button 
@@ -516,6 +593,7 @@ export default function Focus() {
                   setIsFocusLocked(true);
                   setHasStarted(true);
                   setIsRunning(true);
+                  enterFullscreen();
                 }
               }}
               disabled={hasStarted}
@@ -770,6 +848,49 @@ export default function Focus() {
 
         </div>
       </main>
+
+      {/* Fullscreen & Anti-Cheating Warning Overlay Modal */}
+      {showWarningModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="ios-card max-w-sm w-full p-6 text-center space-y-4 border border-forest-critical/35 shadow-[0_0_30px_rgba(239,68,68,0.25)]">
+            <div className="w-16 h-16 mx-auto rounded-full bg-forest-critical/10 flex items-center justify-center text-forest-critical animate-pulse">
+              <SVGIcon name="alert-triangle" className="w-8 h-8" strokeWidth={1.5} />
+            </div>
+            
+            <div className="space-y-1">
+              <h3 className="text-[20px] font-bold text-white tracking-tight">Focus Interrupted!</h3>
+              {warningType === 'fullscreen' ? (
+                <p className="text-[14px] text-text-muted leading-relaxed">
+                  You have exited Fullscreen mode. Active focus sessions require Fullscreen to minimize visual distractions and keep you in the zone.
+                </p>
+              ) : (
+                <p className="text-[14px] text-text-muted leading-relaxed">
+                  Tab switching or screen blur detected. ScholarHub locks focus to safeguard your cognitive flow and maximize study efficiency.
+                </p>
+              )}
+            </div>
+
+            {/* Warning Count Badge */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-forest-critical/15 border border-forest-critical/20 text-forest-critical">
+              <span className="w-1.5 h-1.5 rounded-full bg-forest-critical animate-ping" />
+              <span className="text-[11px] font-bold font-mono uppercase tracking-wider">Warnings Raised: {focusViolations}</span>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                onClick={() => {
+                  enterFullscreen();
+                  setShowWarningModal(false);
+                }}
+                className="w-full h-12 bg-forest-accent text-forest-bg font-bold rounded-2xl active:scale-95 transition-all shadow-md hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                <SVGIcon name="lock" className="w-4 h-4" />
+                <span>Restore Fullscreen & Resume</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav />
     </div>
