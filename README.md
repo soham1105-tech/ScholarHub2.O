@@ -10,11 +10,12 @@ ScholarHub is a premium, iOS-inspired productivity assistant for students. This 
 ┌────────────────────────────────────────────────────────┐
 │                      SCHOLARHUB                        │
 │          "Less Distraction. More Momentum."            │
-├────────────────────────────────────────────────────────┤
+│          ----------------------------------            │
 │  • PROBLEM: Cognitive fatigue and navigation friction  │
 │  • SOLUTION: iOS-style premium focus hub + AI agency   │
 │  • STACK: React 18, Vite, Node, Firebase, Gemini 1.5   │
-│  • VIABILITY: Zero-cold-start backend, cached queries  │
+│  • METRICS: Real-time 30-Day focus trend vector graphs │
+│  • SAFETY: Isolated secret key pipelines & Git-guarded  │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -36,6 +37,7 @@ ScholarHub acts as a **unified, eye-friendly distraction-free home base** that i
 * **Central Task Controller**: Coursework and personal academic obligations prioritized neatly.
 * **Contextual AI Assistant**: An inline Gemini agent tailored to STEM and humanities queries.
 * **Focus Engine**: An immersive "forest-style" spatial environment designed to minimize notifications and hold user state during deep study blocks.
+* **Interactive Focus Analytics**: High-fidelity personal dashboards showing exact study hour trends mapped across multiple dynamic visual representations.
 * **Personalized Dashboard**: A centralized profile aggregating academic metrics (GPA, credits, major) and university metadata.
 
 ---
@@ -54,6 +56,9 @@ ScholarHub goes beyond a typical to-do list or study app. Its distinct market ad
 │ 🧠 Cognitive Alignment  │ Direct toggle from dashboard task to   │
 │                         │ custom Focus Session with one click.   │
 ├──────────────────────────────────────────────────────────────────┤
+│ 📈 Focus Trend Engine   │ Real data dashboard; seamlessly switch │
+│                         │ between 7-day bars and 30-day SVG lines│
+├──────────────────────────────────────────────────────────────────┤
 │ 🛡️ Strict Security      │ Secure Firebase Firestore integration  │
 │                         │ protected by production-ready rules.   │
 ├──────────────────────────────────────────────────────────────────┤
@@ -68,8 +73,16 @@ ScholarHub goes beyond a typical to-do list or study app. Its distinct market ad
 2. **Frictionless Transition from Organization to Execution**
    Standard portals show assignments but don't help students do them. ScholarHub bridges organization and focus. A student can choose an active task (like a **Lab Report**) and launch directly into an immersive focus mode containing standard timers—all on a single screen without changing apps.
 
-3. **Intelligent Local Cache Architecture**
-   Through intelligent deduplication strategies, ScholarHub automatically caches academic feeds and Gemini assistant responses locally. This provides instant loads when refreshing common data while protecting students from hitting backend or API resource limit spikes.
+3. **Multi-Dimensional Focus Analytics (Real Study Analytics)**
+   The newly developed **Focus History Analytics** provides deep structural insights while keeping representations honest:
+   - **Strictly Real Insights**: No pre-populated mock metrics or simulated completion buttons. Historical tracking is built purely from actual completed study increments. Legacy mock data gets filtered out dynamically.
+   - **Dynamic 7-Day Bar Charts**: Tailored columns built relative to student daily cycles (6-hour standard threshold) featuring active hover tooltips.
+   - **Dynamic 30-Day SVG Line Plot**: An elegant mathematical trends vector visualizer complete with shaded fading area fills, vertical grid boundaries, and custom hover states tracking daily focus values.
+
+4. **GitHub-Safe Credential Architecture**
+   To prepare the code for public collaboration/repositories:
+   - `.gitignore` strictly isolates local configuration blueprints (`firebase-applet-config.json`, `.env.local`, `.env`).
+   - A redacted `firebase-applet-config.example.json` serves as the official template for new developers joining the workspace.
 
 ---
 
@@ -128,7 +141,10 @@ Our prototype was designed from day one to be production-ready and fully feasibl
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
-2. Verify that `firebase-applet-config.json` contains your Firebase project metadata.
+2. Copy `firebase-applet-config.example.json` as `firebase-applet-config.json` and fill with your real database metadata:
+   ```bash
+   cp firebase-applet-config.example.json firebase-applet-config.json
+   ```
 
 ### Installation & Development
 ```bash
@@ -146,7 +162,7 @@ To simulate high-performance cloud deployment pipelines locally, compile the sta
 # Compile and build using esbuild and vite compilers
 npm run build
 
-# Direct deployment boot usingcompiled binary assets
+# Direct deployment boot using compiled binary assets
 npm start
 ```
 
