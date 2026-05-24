@@ -3,6 +3,7 @@ import { TopBar } from '../components/TopBar.tsx';
 import { BottomNav } from '../components/BottomNav.tsx';
 import { SVGIcon } from '../components/SVGIcon.tsx';
 import { useApp } from '../AppContext.tsx';
+import { recordFocusSession } from '../lib/focusHistory.ts';
 
 export default function Focus() {
   const { isFocusLocked, setIsFocusLocked } = useApp();
@@ -440,6 +441,7 @@ export default function Focus() {
             setIsFocusLocked(false);
             setSecondsLeft(0);
             localStorage.removeItem('focus_end_time');
+            recordFocusSession(90);
             exitFullscreen();
           } else {
             setSecondsLeft(timeLeft);
@@ -451,6 +453,7 @@ export default function Focus() {
               setIsRunning(false);
               setHasStarted(false);
               setIsFocusLocked(false);
+              recordFocusSession(90);
               return 0;
             }
             return prev - 1;
